@@ -168,6 +168,11 @@ class CombineEmoMatchDataset:
     def __init__(self, batch_size, size, n_video_samples, img_mean_std, aud_mean_std, validation=False):
         def image_transform(x):
             if x is not None:
+                return (x - 128.0)/128.0
+            return None
+
+        def image_augmentate_transform(x):
+            if x is not None:
                 x = random_fliplr(x)
                 x = random_noise(x, 10)
 
