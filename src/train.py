@@ -165,7 +165,7 @@ def random_noise(x, strength=1):
     return np.clip(x + noise, 0.0, 255.0).astype(np.int)
 
 class CombineEmoMatchDataset:
-    def __init__(self, batch_size, size, n_video_samples, img_mean_std, aud_mean_std):
+    def __init__(self, batch_size, size, n_video_samples, img_mean_std, aud_mean_std, validation=False):
         def image_transform(x):
             if x is not None:
                 x = random_fliplr(x)
@@ -185,7 +185,7 @@ class CombineEmoMatchDataset:
             batch = [x for x in batch if x ]
             return default_collate(batch)
 
-        ds_p = EmoMatchDataset('/workspace/data/VoxCeleb/dev/', n_video_samples=n_video_samples, image_transform=image_transform, stft_transform=stft_transform, size=size)
+        ds_p = EmoMatchDataset('/workspace/data/VoxCeleb/dev/', n_video_samples=n_video_samples, image_transform=image_transform if validation else image_augmentate_transform, stft_transform=stft_transform, size=size)
         ds_n = copy.deepcopy(ds_p)
         ds_n.map_correct = False 
         print('Dataset\'s length', len(ds_n))
@@ -336,7 +336,7 @@ def main():
     n_global_step = 0
 
     training_dataset = CombineEmoMatchDataset(batch_size=batch_size, size=10000, n_video_samples=n_video_samples, img_mean_std=img_mean_std, aud_mean_std=aud_mean_std)
-    validation_dataset = CombineEmoMatchDataset(batch_size=batch_size, size=-500, n_video_samples=n_video_samples, img_mean_std=img_mean_std, aud_mean_std=aud_mean_std)
+    validation_dataset = CombineEmoMatchDataset(batch_size=batch_size, size=-500, n_video_samples=n_video_samples, img_mean_std=img_mean_std, aud_mean_std=aud_mean_std, validation=True)
     loss, accuracy = validate(validation_dataset, avnet, writer, n_global_step)
     print("Validation: Loss={0:.4f}, Accuracy={1:.4f}".format(loss, accuracy))
     
